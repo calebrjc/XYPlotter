@@ -9,11 +9,9 @@
 
 #include "Arduino.h"
 #include "command.hpp"
+#include "serial_util.hpp"
 
 namespace calebrjc::XYPlotter {
-// Numerical constants
-const int MAX_RAW_DATA_SIZE = 20; // bytes
-
 class CommandParser final {
  public:
   // Returns a Command structure constructed with data gathered from the Serial interface that the
@@ -22,7 +20,7 @@ class CommandParser final {
   Command queue();
 
  private:
-  // Returns a buffer containing data from the serial interface, formatted to make parsing easier.
+  // Loads formatted data into o_data, using raw data gathered from the Serial interface.
   //
   // Input data format: 4-character instruction string and up to 4
   // 4-chracter hex numbers, for a max of 20 bytes.
@@ -31,14 +29,14 @@ class CommandParser final {
   // Output data format: Same as the raw data format, but with
   // dashes inserted between blocks to make parsing easier.
   // Ex: INST-270F-1E61
-  char *getRawData();
+  void getProcessedData(char *o_data);
 
   // Returns a Command structure that has been filled with information gleaned from the buffer that
   // is passed in, presumably one made from a call to getRawData().
   //
-  // For example, if this method is called with the data used in getRawData's example, the
+  // For example, if this method is called with the data used in getProcessedData's example, the
   // following statements should be true, given that the returned Command was stored in a variable
-  // named Command:
+  // named command:
   //
   // command.instruction = "INST"
   // command.numParameters = 2

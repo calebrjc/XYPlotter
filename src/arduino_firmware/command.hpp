@@ -24,8 +24,8 @@ const size_t MAX_NUM_PARAMETERS = 4;      // integers
 
 struct Command final {
   char instruction[MAX_INSTRUCTION_LENGTH + 1];  // 5 bytes
-  size_t numParameters;                          // 8 bytes
-  int parameters[MAX_NUM_PARAMETERS];            // 16 bytes
-};  // Command                                   // Total = 29 bytes
+  int numParameters;                             // 8 bytes
+  long int parameters[MAX_NUM_PARAMETERS];       // 32 bytes
+};  // Command                                   // Total = 45 bytes
 }  // namespace calebrjc::XYPlotter
 #endif  // XYPLOTTER_ARDUINO_FIRMWARE_HPP_

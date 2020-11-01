@@ -9,7 +9,8 @@ namespace calebrjc::XYPlotter {
 // String constants for command names.
 
 void XYPlotterController::initializePlotter() {
-  // Code goes here.
+  Serial.begin(9600);
+  while (!Serial) { } // Halt execution until the serial interface is ready
 }  // XYPlotterController::initializePlotter()
 
 void XYPlotterController::executeCommand(Command c) {

@@ -23,8 +23,11 @@ const String MESSAGE_ERROR = "ERROR";
 // This function broadcasts the inputted String via the Serial interface of the Arduino.
 void sendMessage(String message);
 
-// This function retrieves raw data from the Serial interface of the Arduino.
-char *getMessage();
+// This function retrieves raw data from the Serial interface of the Arduino and stores it in the
+// inputted char*. As it stands, all incoming messages must be contained within angle brackets
+// ('<' and '>') and the string of characters in between them must have a length of 20, for a total
+// message length of 22 characters.
+void getMessage(char *o_data);
 }  // namespace SerialUtil
 }  // namespace calebrjc::XYPlotter
 
