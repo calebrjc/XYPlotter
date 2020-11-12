@@ -8,15 +8,16 @@
 #ifndef XYPLOTTER_XY_PLOTTER_CONTROLLER_HPP_
 #define XYPLOTTER_XY_PLOTTER_CONTROLLER_HPP_
 
+#include "Arduino.h"
 #include "command.hpp"
 #include "serial_util.hpp"
 
 namespace calebrjc::XYPlotter {
 // Pin constants
-const int PIN_X_STEP = 7;
-const int PIN_X_DIRECTION = 8;
-const int PIN_Y_STEP = 9;
-const int PIN_Y_DIRECTION = 10;
+const int PIN_X_DIRECTION = 9;
+const int PIN_X_STEP      = 10;
+const int PIN_Y_DIRECTION = 11;
+const int PIN_Y_STEP      = 12;
 
 class XYPlotterController final {
  public:
@@ -25,16 +26,22 @@ class XYPlotterController final {
   // the Serial interface with SerialUtil::MESSAGE_READY when initialization is finished.
   void initializePlotter();
 
-  // This method takes the inputted command and attempts to execute it, reporting back to the
-  // serial with either SerialUtil::MESSAGE_OK or SerialUtil::MESSAGE_ERROR as appropriate,
-  // typically based on the result of one of the private execution methods.
-  void executeCommand(Command c);
+  // This method takes the inputted command and attempts to execute it, returning an Arduino String
+  // containing SerialUtil::MESSAGE_OKAY or an error description as appropriate, typically based on
+  // the result of one of the private execution methods.
+  String executeCommand(Command c);
 
  private:
-  // Returns true if the plotter is successfully turned off.
+  // Returns true if the plotter is successfully turned off (execution stops and pen is lifted).
   // Note: THIS METHOD DOES NOT END PROGRAM EXECUTION.
   bool turnOff();
-};  // XYPlotterController
-}  // namespace calebrjc::XYPlotter
 
-#endif  // XYPLOTTER_XY_PLOTTER_CONTROLLER_HPP_
+  // Returns true if the plotter is successful in testing the motor that controls the X axis.
+  bool testX();
+
+  // Returns true if the plotter is successful in testing the motor that controls the Y axis.
+  bool testY();
+}; // XYPlotterController
+} // namespace calebrjc::XYPlotter
+
+#endif // XYPLOTTER_XY_PLOTTER_CONTROLLER_HPP_

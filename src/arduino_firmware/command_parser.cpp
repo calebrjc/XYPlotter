@@ -7,8 +7,8 @@
 
 namespace calebrjc::XYPlotter {
 // Numerical constants
-const size_t MAX_RAW_DATA_SIZE = 20;    // bytes
-const size_t FORMATTED_DATA_SIZE = 25;  // bytes
+const size_t MAX_RAW_DATA_SIZE   = 20; // bytes
+const size_t FORMATTED_DATA_SIZE = 25; // bytes
 
 Command CommandParser::queue() {
   char data[FORMATTED_DATA_SIZE + 1];
@@ -17,27 +17,30 @@ Command CommandParser::queue() {
   Command command = this->convertToCommand(data);
 
   return command;
-}  // CommandParser::queue
+} // CommandParser::queue
 
 void CommandParser::getProcessedData(char *o_data) {
-  char data[MAX_RAW_DATA_SIZE];
+  char data[MAX_RAW_DATA_SIZE + 1];
   SerialUtil::getMessage(data);
 
   int numDashes = 0;
   for (size_t i = 0; i < FORMATTED_DATA_SIZE; i++) {
     o_data[i] = data[i - numDashes];
-    if (i > 0 && i == (5 * (numDashes + 1)) - 1) {
+    if (i > 0 && (int)i == (5 * (numDashes + 1)) - 1) {
       o_data[i] = '-';
       numDashes++;
     } // if
-  } // for
+  }   // for
   o_data[FORMATTED_DATA_SIZE - 1] = '\0';
-}  // CommandParser::getRawData
+} // CommandParser::getRawData
 
 int getNumParameters(char *instruction) {
   int numParameters = -1;
 
-  if (strcmp(instruction, "TOFF") == 0) numParameters = 0;
+  if (strcmp(instruction, COMMAND_TEST) == 0) numParameters = 0;
+  if (strcmp(instruction, COMMAND_TURN_OFF) == 0) numParameters = 0;
+  if (strcmp(instruction, COMMAND_TEST_X) == 0) numParameters = 0;
+  if (strcmp(instruction, COMMAND_TEST_Y) == 0) numParameters = 0;
 
   return numParameters;
 } // getNumParameters
@@ -50,10 +53,10 @@ Command CommandParser::convertToCommand(char *data) {
   strcpy(c.instruction, token);
   c.numParameters = getNumParameters(c.instruction);
   for (auto i = 0; i < c.numParameters; i++) {
-    token = strtok(nullptr, "-");
+    token           = strtok(nullptr, "-");
     c.parameters[i] = strtol(token, nullptr, 16);
   } // for
 
   return c;
-}  // CommandParser::convertToCommand
-}  // namespace calebrjc::XYPlotter
+} // CommandParser::convertToCommand
+} // namespace calebrjc::XYPlotter

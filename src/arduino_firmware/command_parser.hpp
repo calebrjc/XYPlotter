@@ -8,6 +8,7 @@
 #define XYPLOTTER_COMMAND_PARSER_HPP_
 
 #include "Arduino.h"
+
 #include "command.hpp"
 #include "serial_util.hpp"
 
@@ -42,7 +43,7 @@ class CommandParser final {
   // command.numParameters = 2
   // command.parameters = {270F, 1E61}
   Command convertToCommand(char *data);
-};  // CommandParser
-}  // namespace calebrjc::XYPlotter
+}; // CommandParser
+} // namespace calebrjc::XYPlotter
 
-#endif  // XYPLOTTER_COMMAND_PARSER_HPP_
+#endif // XYPLOTTER_COMMAND_PARSER_HPP_

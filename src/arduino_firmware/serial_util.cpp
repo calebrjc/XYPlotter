@@ -7,8 +7,8 @@
 
 namespace calebrjc::XYPlotter {
 void SerialUtil::sendMessage(String message) {
-  Serial.println(message);
-}  // SerialUtil::sendMessage
+  Serial.print(message);
+} // SerialUtil::sendMessage
 
 void SerialUtil::getMessage(char *o_data) {
   bool reading = true, recording = false;
@@ -19,12 +19,11 @@ void SerialUtil::getMessage(char *o_data) {
     c = Serial.read();
 
     if (recording) {
-      if (c == '>') {
-        reading = false;
-      }
+      if (c == '>') { reading = false; }
       if (reading) (*o_data++) = c;
     } // if
     if (c == '<') recording = true;
   } // while
-}  // SerialUtil::getMessage
-}  // namespace calebrjc::XYPlotter
+  *o_data = '\0';
+} // SerialUtil::getMessage
+} // namespace calebrjc::XYPlotter
