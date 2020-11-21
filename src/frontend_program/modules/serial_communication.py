@@ -13,8 +13,7 @@ class SerialCommunicator:
         print("Initializing plotter", end="")
 
         # Initialize serial connection
-        self.ser
-        self.ser = serial.Serial("COM5", 9600, timeout=.1)
+        self.ser = serial.Serial("COM8", 9600, timeout=.1)
 
         print(".", end="")
 

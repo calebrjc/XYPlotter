@@ -20,10 +20,16 @@ const size_t MAX_NUM_PARAMETERS     = 4;  // integers
 //
 // Note: These constants use the "#define" preprocessor macro instead of the "const char *" type in
 // order to avoid multiple definition complications.
-#define COMMAND_TURN_OFF "TOFF"
-#define COMMAND_TEST     "TEST"
-#define COMMAND_TEST_X   "TSTX"
-#define COMMAND_TEST_Y   "TSTY"
+#define COMMAND_TEST      "TEST"
+#define COMMAND_TURN_OFF  "TOFF"
+#define COMMAND_TEST_X    "TSTX"
+#define COMMAND_TEST_Y    "TSTY"
+#define COMMAND_TEST_Z    "TSTZ"
+#define COMMAND_PEN_UP    "PENU"
+#define COMMAND_PEN_DOWN  "PEND"
+#define COMMAND_HOME      "HOME"
+#define COMMAND_MOVE      "MOVE"
+#define COMMAND_DRAW_LINE "DRLN"
 
 struct Command final {
   char instruction[MAX_INSTRUCTION_LENGTH + 1]; // 5 bytes

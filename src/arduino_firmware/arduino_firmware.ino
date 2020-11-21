@@ -35,6 +35,5 @@ void setup() {
 void loop() {
   calebrjc::XYPlotter::Command c = cp.queue();
   String acknowledgement         = xypc.executeCommand(c);
-  Serial.println(acknowledgement);
   calebrjc::XYPlotter::SerialUtil::sendMessage(acknowledgement);
 } // loop
