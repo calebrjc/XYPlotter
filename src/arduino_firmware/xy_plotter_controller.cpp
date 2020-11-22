@@ -11,8 +11,10 @@ long yLast;
 
 int readLightSensor() {
   int value = analogRead(PIN_LIGHT_SENSOR);
-  if (value > 500) digitalWrite(4, HIGH);
-  else digitalWrite(500, LOW);
+  if (value > 500)
+    digitalWrite(4, HIGH);
+  else
+    digitalWrite(4, LOW);
   return value;
 }
 
@@ -59,7 +61,7 @@ void XYPlotterController::initializePlotter() {
   zeroPlotter();
 
   ////////// STEPPER INITIALIZAITON //////////
-  long stepperSpeed = 250; //was 250
+  long stepperSpeed = 250;  // was 250
 
   this->xStepper1 = AccelStepper(AccelStepper::DRIVER, PIN_X1_STEP, PIN_X1_DIRECTION);
   this->xStepper1.setMaxSpeed(stepperSpeed);
@@ -78,10 +80,9 @@ void XYPlotterController::initializePlotter() {
   steppers.addStepper(xStepper2);
   steppers.addStepper(yStepper);
 
-
   // Run motors until bumpers are no longer hit
   offZero();
-  
+
   /*
   this->xStepper1.setCurrentPosition(0);
   this->xStepper2.setCurrentPosition(0);
@@ -109,7 +110,7 @@ void XYPlotterController::initializePlotter() {
   this->setTargetCoordinates(this->xWidth - 50, this->yCurrent);
   this->runToCompletion();
   this->xOrigin = this->findOrigin('x');
-  
+
   this->home();
 
   Serial.print("Y Width: ");
@@ -143,14 +144,14 @@ long XYPlotterController::findWidth(char axis) {
     // Finding x width
     this->setTargetCoordinates(PLOTTER_WIDTH, this->yCurrent);
     Serial.println("Detecting right edge... (light to dark transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step(); //FOREGROUND
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // FOREGROUND
     Serial.println("DONE");
     return this->xCurrent;
   } else {
     // Finding y width
     this->setTargetCoordinates(this->xCurrent, PLOTTER_WIDTH);
     Serial.println("Detecting bottom edge... (light to dark transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step(); //BACKGROUND
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // BACKGROUND
     Serial.println("DONE");
     return this->yCurrent;
   }  //  if-else
@@ -162,7 +163,7 @@ long XYPlotterController::findOrigin(char axis) {
     this->setTargetCoordinates(0, this->yCurrent);
 
     Serial.println("Detecting right edge... again... (dark to light transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step(); //Foreground
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // Foreground
     Serial.println("DONE");
     /*
     Serial.println("Detecting left edge... (light to dark transition)");
@@ -175,7 +176,7 @@ long XYPlotterController::findOrigin(char axis) {
     this->setTargetCoordinates(this->xCurrent, 0);
 
     Serial.println("Detecting bottom edge... again... (dark to light transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step(); //forground
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // forground
     Serial.println("DONE");
     /*
     Serial.println("Detecting top edge... (light to dark transition)");
@@ -227,6 +228,12 @@ String XYPlotterController::executeCommand(Command c) {
     return (this->penDown()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
   }  // if
 
+  if (strcmp(c.instruction, COMMAND_DRAW_LINE) == 0) {
+    return (this->drawLine(c.parameters[0], c.parameters[1], c.parameters[2], c.parameters[3]))
+               ? SerialUtil::MESSAGE_OK
+               : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
   return SerialUtil::MESSAGE_ERROR;
 }  // XYPlotterController::executeCommand()
 
@@ -244,9 +251,8 @@ bool XYPlotterController::isAtTarget() {
 
 bool XYPlotterController::step() {
   digitalWrite(PIN_ENABLE, LOW);
-  if (digitalRead(PIN_EMERGENCY_STOP) == 1 ||
-           readBumpers('x') < BUMPER_PRESS || 
-           readBumpers('y') < BUMPER_PRESS) {
+  if (digitalRead(PIN_EMERGENCY_STOP) == 1 || readBumpers('x') < BUMPER_PRESS ||
+      readBumpers('y') < BUMPER_PRESS) {
     digitalWrite(PIN_ENABLE, HIGH);
     return false;
   }  // if
@@ -308,13 +314,13 @@ bool XYPlotterController::testY() {
 // }  // testZ
 
 bool XYPlotterController::penUp() {
-   this->servo.write(SERVO_UP_POS);
-   return true;
+  this->servo.write(SERVO_UP_POS);
+  return true;
 }
 
 bool XYPlotterController::penDown() {
-   this->servo.write(SERVO_DOWN_POS);
-   return true;
+  this->servo.write(SERVO_DOWN_POS);
+  return true;
 }
 
 // bool move(long x1, long y1, long x2, long y2) {
@@ -328,8 +334,8 @@ void XYPlotterController::zeroPlotter() {
   digitalWrite(PIN_Y_DIRECTION, LOW);
   digitalWrite(PIN_X1_DIRECTION, LOW);
   digitalWrite(PIN_X2_DIRECTION, LOW);
-  
-  while(readBumpers('x') > BUMPER_PRESS || readBumpers('y') > BUMPER_PRESS) {
+
+  while (readBumpers('x') > BUMPER_PRESS || readBumpers('y') > BUMPER_PRESS) {
     if (readBumpers('x') > BUMPER_PRESS) {
       moveStepper(PIN_X1_STEP);
       moveStepper(PIN_X2_STEP);
@@ -337,9 +343,9 @@ void XYPlotterController::zeroPlotter() {
     if (readBumpers('y') > BUMPER_PRESS) {
       moveStepper(PIN_Y_STEP);
     }  // if
-  } // while
+  }    // while
   digitalWrite(PIN_ENABLE, HIGH);
-} // zeroPlotter
+}  // zeroPlotter
 
 void XYPlotterController::offZero() {
   digitalWrite(PIN_ENABLE, LOW);
@@ -353,7 +359,7 @@ void XYPlotterController::offZero() {
     moveStepper(PIN_X1_STEP);
     moveStepper(PIN_X2_STEP);
     moveStepper(PIN_Y_STEP);
-  } // for i
+  }  // for i
   this->xStepper1.setCurrentPosition(stepsOff);
   this->xStepper2.setCurrentPosition(stepsOff);
   this->yStepper.setCurrentPosition(stepsOff);
@@ -361,14 +367,14 @@ void XYPlotterController::offZero() {
   this->yCurrent = this->yStepper.currentPosition();
 
   digitalWrite(PIN_ENABLE, HIGH);
-} // off zero
+}  // off zero
 
 void XYPlotterController::moveStepper(const int pin) {
   digitalWrite(pin, HIGH);
   delayMicroseconds(2000);
   digitalWrite(pin, LOW);
   delayMicroseconds(2000);
-} // move stepper
+}  // move stepper
 
 bool XYPlotterController::home() {
   this->setTargetCoordinates(this->xOrigin, this->yOrigin);
@@ -378,9 +384,21 @@ bool XYPlotterController::home() {
   return true;
 }  // home
 
-// bool drawLine(long x1, long y1, long x2, long y2) {
-//   //
-//   //
-//   return true;
-// }  // drawLone
+bool XYPlotterController::drawLine(long x1, long y1, long x2, long y2) {
+  long xStart, yStart, xEnd, yEnd;
+  xStart = this->unscale(x1, 'x');
+  yStart = this->unscale(y1, 'y');
+  xEnd = this->unscale(x2, 'x');
+  yEnd = this->unscale(y2, 'y');
+
+  this->penUp();
+  if (this->xCurrent != xStart || this->yCurrent != yStart) {
+    this->setTargetCoordinates(xStart, yStart);
+    this->runToCompletion();
+  }  // if
+  this->penDown();
+
+  this->setTargetCoordinates(xEnd, yEnd);
+  return this->runToCompletion();
+}  // drawLone
 }  // namespace calebrjc::XYPlotter

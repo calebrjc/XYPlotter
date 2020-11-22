@@ -26,6 +26,8 @@ def interpret_command(command):
         if command.find("-pd") != -1:
             print("TPDN()")
             p.pen_down()
+    if command.find("draw") != -1:
+        p.draw_line(0, 0, 1000, 1000)
     if command.find("exit") == 0:
         print("goodbye")
         sys.exit(0)

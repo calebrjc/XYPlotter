@@ -5,6 +5,7 @@ def nths(num):
     result = hex(num).lstrip("0x").rstrip("L")
     while len(result) < 4:
         result = "0" + result
+    return result
 
 
 class Plotter:
