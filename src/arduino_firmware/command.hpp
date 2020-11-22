@@ -12,20 +12,29 @@
 
 namespace calebrjc::XYPlotter {
 // Numerical constants
-const size_t MAX_BUFFER_SIZE = 64;        // bytes
+const size_t MAX_BUFFER_SIZE        = 64; // bytes
 const size_t MAX_INSTRUCTION_LENGTH = 4;  // characters
-const size_t MAX_NUM_PARAMETERS = 4;      // integers
+const size_t MAX_NUM_PARAMETERS     = 4;  // integers
 
 // String constants
 //
 // Note: These constants use the "#define" preprocessor macro instead of the "const char *" type in
 // order to avoid multiple definition complications.
-#define COMMAND_TURN_OFF "TOFF"
+#define COMMAND_TEST      "TEST"
+#define COMMAND_TURN_OFF  "TOFF"
+#define COMMAND_TEST_X    "TSTX"
+#define COMMAND_TEST_Y    "TSTY"
+#define COMMAND_TEST_Z    "TSTZ"
+#define COMMAND_PEN_UP    "PENU"
+#define COMMAND_PEN_DOWN  "PEND"
+#define COMMAND_HOME      "HOME"
+#define COMMAND_MOVE      "MOVE"
+#define COMMAND_DRAW_LINE "DRLN"
 
 struct Command final {
-  char instruction[MAX_INSTRUCTION_LENGTH + 1];  // 5 bytes
-  size_t numParameters;                          // 8 bytes
-  int parameters[MAX_NUM_PARAMETERS];            // 16 bytes
-};  // Command                                   // Total = 29 bytes
-}  // namespace calebrjc::XYPlotter
-#endif  // XYPLOTTER_ARDUINO_FIRMWARE_HPP_
+  char instruction[MAX_INSTRUCTION_LENGTH + 1]; // 5 bytes
+  int numParameters;                            // 8 bytes
+  long int parameters[MAX_NUM_PARAMETERS];      // 32 bytes
+}; // Command                                   // Total = 45 bytes
+} // namespace calebrjc::XYPlotter
+#endif // XYPLOTTER_ARDUINO_FIRMWARE_HPP_

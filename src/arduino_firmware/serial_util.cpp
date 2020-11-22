@@ -7,11 +7,23 @@
 
 namespace calebrjc::XYPlotter {
 void SerialUtil::sendMessage(String message) {
-  // Code goes here.
-}  // SerialUtil::sendMessage
+  Serial.print(message);
+} // SerialUtil::sendMessage
 
-char *SerialUtil::getMessage() {
-  // Code goes here.
-  return (char *)("Hello!");
-}  // SerialUtil::getMessage
-}  // namespace calebrjc::XYPlotter
+void SerialUtil::getMessage(char *o_data) {
+  bool reading = true, recording = false;
+  char c;
+  while (reading) {
+    if (Serial.available() <= 0) continue; // Wait until serial data is available
+
+    c = Serial.read();
+
+    if (recording) {
+      if (c == '>') { reading = false; }
+      if (reading) (*o_data++) = c;
+    } // if
+    if (c == '<') recording = true;
+  } // while
+  *o_data = '\0';
+} // SerialUtil::getMessage
+} // namespace calebrjc::XYPlotter
