@@ -33,7 +33,7 @@ def interpret_command(command):
         print(word[0] + " " + word[1])
         p.draw_segment(int(word[0]), int(word[1]))
     if command.find("write") == 0:
-        
+        countLetters(command[6:len(command)])
     if command.find("home") == 0:
         p.home()
     if command.find("exit") == 0:
@@ -51,20 +51,194 @@ def begin():
 
 def countLetters(word):
     size = len(word)
-    space = 10
-    scale = (1000/(size + 1)) - (size * space)
-    x = scale/2
-    y = scale/2
-    factor = scale/21 #this is the scaling factor to write letters
+    space = 25
+    scalex = int((1000/(size + 1)) - space)
+    scaley = 700
+    x = scalex/2
+    y = 500 - (scaley/2)
+    factorx = scalex/21 #this is the scaling factor to write letters
+    factory = scaley/21
     for i in word:
-        drawLetter(i, x, y, factor)
-        x += (scale + space)
+        drawLetter(i, x, y, factorx, factory)
+        x += (scalex + space)
         
-def drawLetter(l, x, y, scale):
+def drawLetter(l, x, y, scalex, scaley):
     if (l == ' '):
         return
     if (l == 'A'):
-        p.draw_line(x+scale*0, y+scale*0, x+scale*9, y+scale*21)
-        p.draw_segment(x+scale*17, y+scale*0)
-        p.draw_line(x+scale*4, y+scale*8, x+scale*14, y+scale*8)
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*10, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*0)
+        p.draw_line(x+scalex*10, y+scaley*9, x+scalex*21, y+scaley*9)
+        return
+    if (l == 'B'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_segment(x+scalex*14, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*18)
+        p.draw_segment(x+scalex*21, y+scaley*14)
+        p.draw_segment(x+scalex*14, y+scaley*12)
+        p.draw_segment(x+scalex*0, y+scaley*12)
+        p.draw_line(x+scalex*14, y+scaley*12, x+scalex*21, y+scaley*9)
+        p.draw_segment(x+scalex*21, y+scaley*5)
+        p.draw_segment(x+scalex*14, y+scaley*0)
+        p.draw_segment(x+scalex*0, y+scaley*0)
+        return
+    if (l == 'C'):
+        p.draw_line(x+scalex*21, y+scaley*21, x+scalex*10, y+scaley*21)
+       	p.draw_segment(x+scalex*0, y+scaley*14)
+        p.draw_segment(x+scalex*0, y+scaley*5)
+        p.draw_segment(x+scalex*10, y+scaley*0)
+        p.draw_segment(x+scalex*21, y+scaley*0)
+        return
+    if (l == 'D'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+       	p.draw_segment(x+scalex*10, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*14)
+        p.draw_segment(x+scalex*21, y+scaley*7)
+        p.draw_segment(x+scalex*10, y+scaley*0)
+        p.draw_segment(x+scalex*0, y+scaley*0)
+        return
+    if (l == 'E'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+       	p.draw_segment(x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*10, x+scalex*21, y+scaley*10)
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'F'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*14, x+scalex*21, y+scaley*14)
+        return
+    if (l == 'G'):
+        p.draw_line(x+scalex*21, y+scaley*21, x+scalex*21, y+scaley*11)
+        p.draw_segment(x+scalex*0, y+scaley*17)
+        p.draw_segment(x+scalex*0, y+scaley*13)
+        p.draw_segment(x+scalex*10, y+scaley*0)
+        p.draw_segment(x+scalex*17, y+scaley*0)
+        p.draw_segment(x+scalex*17, y+scaley*13)
+        p.draw_segment(x+scalex*11, y+scaley*13)
+        p.draw_segment(x+scalex*11, y+scaley*10)
+        return
+    if (l == 'H'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*12, x+scalex*21, y+scaley*12)
+        p.draw_line(x+scalex*21, y+scaley*21, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'I'):
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*9, y+scaley*21, x+scalex*9, y+scaley*0)
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'J'):
+        p.draw_line(x+scalex*5, y+scaley*21, x+scalex*15, y+scaley*21)
+        p.draw_line(x+scalex*10, y+scaley*21, x+scalex*10, y+scaley*8)
+        p.draw_segment(x+scalex*8, y+scaley*5)
+        p.draw_segment(x+scalex*3, y+scaley*5)
+        p.draw_segment(x+scalex*2, y+scaley*6)
+        p.draw_segment(x+scalex*2, y+scaley*8)
+        return
+    if (l == 'K'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*10, x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*10, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'L'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'M'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_segment(x+scalex*10, y+scaley*14)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*0)
+        return
+    if (l == 'N'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*14, x+scalex*21, y+scaley*7)
+        p.draw_line(x+scalex*21, y+scaley*0, x+scalex*21, y+scaley*21)
+        return
+    if (l == 'O'):
+        p.draw_line(x+scalex*14, y+scaley*0, x+scalex*7, y+scaley*0)
+        p.draw_segment(x+scalex*0, y+scaley*5)
+        p.draw_segment(x+scalex*0, y+scaley*16)
+        p.draw_segment(x+scalex*7, y+scaley*21)
+        p.draw_segment(x+scalex*14, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*16)
+        p.draw_segment(x+scalex*21, y+scaley*5)
+        p.draw_segment(x+scalex*14, y+scaley*0)
+        return
+    if (l == 'P'):
+        p.draw_line(x+scalex*0, y+scaley*0, x+scalex*0, y+scaley*21)
+        p.draw_segment(x+scalex*14, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*18)
+        p.draw_segment(x+scalex*21, y+scaley*14)
+        p.draw_segment(x+scalex*14, y+scaley*11)
+        p.draw_segment(x+scalex*0, y+scaley*11)
+        return
+    if (l == 'Q'):
+        p.draw_line(x+scalex*14, y+scaley*0, x+scalex*7, y+scaley*0)
+        p.draw_segment(x+scalex*0, y+scaley*5)
+        p.draw_segment(x+scalex*0, y+scaley*16)
+        p.draw_segment(x+scalex*7, y+scaley*21)
+        p.draw_segment(x+scalex*14, y+scaley*21)
+        p.draw_segment(x+scalex*21, y+scaley*16)
+        p.draw_segment(x+scalex*21, y+scaley*5)
+        p.draw_segment(x+scalex*14, y+scaley*0)
+        p.draw_line(x+scalex*17, y+scaley*7, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'R'): 
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*0, y+scaley*0)
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*17, y+scaley*21)
+        p.draw_segment(x+scalex*19, y+scaley*19)
+        p.draw_segment(x+scalex*19, y+scaley*17)
+        p.draw_segment(x+scalex*17, y+scaley*17)
+        p.draw_segment(x+scalex*0, y+scaley*17)
+        p.draw_line(x+scalex*17, y+scaley*17, x+scalex*21, y+scaley*0)
+        return
+    if (l == 'S'): 
+        p.draw_line(x+scalex*21, y+scaley*21, x+scalex*7, y+scaley*21)
+        p.draw_segment(x+scalex*0, y+scaley*18)
+        p.draw_segment(x+scalex*0, y+scaley*15)
+        p.draw_segment(x+scalex*7, y+scaley*12)
+        p.draw_segment(x+scalex*14, y+scaley*12)
+        p.draw_segment(x+scalex*21, y+scaley*9)
+        p.draw_segment(x+scalex*21, y+scaley*6)
+        p.draw_segment(x+scalex*14, y+scaley*0)
+        p.draw_segment(x+scalex*0, y+scaley*0)
+        return
+    if (l == 'T'):
+        p.draw_line(x+scalex*10, y+scaley*0, x+scalex*10, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*21, y+scaley*21)
+        return
+    if (l == 'U'):
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*0, y+scaley*5)
+        p.draw_segment(x+scalex*5, y+scaley*0)
+        p.draw_segment(x+scalex*16, y+scaley*0)
+        p.draw_segment(x+scalex*21, y+scaley*5)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        return
+    if (l == 'V'):
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*10, y+scaley*0)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        return
+    if (l == 'W'):
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*7, y+scaley*0)
+        p.draw_segment(x+scalex*10, y+scaley*14)
+        p.draw_segment(x+scalex*14, y+scaley*0)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        return
+    if (l == 'X'):
+        p.draw_line(x+scalex*10, y+scaley*10, x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*10, y+scaley*10, x+scalex*21, y+scaley*0)
+        p.draw_line(x+scalex*10, y+scaley*10, x+scalex*0, y+scaley*21)
+        p.draw_line(x+scalex*10, y+scaley*10, x+scalex*0, y+scaley*0)
+        return
+    if (l == 'Y'):
+        p.draw_line(x+scalex*10, y+scaley*0, x+scalex*10, y+scaley*12)
+        p.draw_segment(x+scalex*21, y+scaley*21)
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*10, y+scaley*12)
+        return
+    if (l == 'Z'):
+        p.draw_line(x+scalex*0, y+scaley*21, x+scalex*21, y+scaley*21)
+        p.draw_segment(x+scalex*0, y+scaley*0)
+        p.draw_segment(x+scalex*21, y+scaley*0)
         return

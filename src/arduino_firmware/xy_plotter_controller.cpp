@@ -417,6 +417,7 @@ bool XYPlotterController::drawLine(long x1, long y1, long x2, long y2) {
     this->runToCompletion();
   }  // if
   this->penDown();
+  delay(50)
   return this->drawSegment(xEnd, yEnd);
 }  // drawLone
 

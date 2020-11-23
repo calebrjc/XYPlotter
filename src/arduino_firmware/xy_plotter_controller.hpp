@@ -26,10 +26,10 @@ const int SERVO_DOWN_POS = 100;  // DEFINE THIS
 const int BUMPER_PRESS = 900;
 
 // Analog pins
-#define PIN_LIGHT_SENSOR A6
+#define PIN_LIGHT_SENSOR A5
 //#define PIN_SERVO 3  // DEFINED
-#define PIN_X_BUMPERS A1
-#define PIN_Y_BUMPERS A2
+#define PIN_X_BUMPERS A2
+#define PIN_Y_BUMPERS A3
 
 // Digital pins
 const int PIN_SERVO = 3;

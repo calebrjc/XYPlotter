@@ -13,7 +13,7 @@ class SerialCommunicator:
         print("Initializing plotter", end="")
 
         # Initialize serial connection
-        self.ser = serial.Serial("/dev/tty.usbserial-1410", 9600, timeout=.1)
+        self.ser = serial.Serial("/dev/tty.usbserial-1420", 9600, timeout=.1)
 
         print(".", end="")
 

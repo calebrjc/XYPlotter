@@ -2,7 +2,7 @@ from . import serial_communication as SC
 
 
 def nths(num):
-    result = hex(num).lstrip("0x").rstrip("L")
+    result = hex(int(num)).lstrip("0x").rstrip("L")
     while len(result) < 4:
         result = "0" + result
     return result
