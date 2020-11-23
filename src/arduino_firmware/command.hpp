@@ -30,6 +30,7 @@ const size_t MAX_NUM_PARAMETERS     = 4;  // integers
 #define COMMAND_HOME      "HOME"
 #define COMMAND_MOVE      "MOVE"
 #define COMMAND_DRAW_LINE "DRLN"
+#define COMMAND_DRAW_SEG  "DRSG"
 
 struct Command final {
   char instruction[MAX_INSTRUCTION_LENGTH + 1]; // 5 bytes

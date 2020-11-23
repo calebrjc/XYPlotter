@@ -111,7 +111,11 @@ void XYPlotterController::initializePlotter() {
   this->runToCompletion();
   this->xOrigin = this->findOrigin('x');
 
+//////Calibrate home based on sensor location off center////////
+  calcHome(xOrigin, yOrigin, xWidth, yWidth);
+  
   this->home();
+  SerialUtil::sendMessage(SerialUtil::MESSAGE_READY);
 
   Serial.print("Y Width: ");
   Serial.println(this->yWidth);
@@ -121,8 +125,6 @@ void XYPlotterController::initializePlotter() {
   Serial.println(this->xWidth);
   Serial.print("X Origin: ");
   Serial.println(this->xOrigin);
-
-  SerialUtil::sendMessage(SerialUtil::MESSAGE_READY);
 }  // XYPlotterController::initializePlotter()
 
 void XYPlotterController::findPaper() {
@@ -199,6 +201,13 @@ long XYPlotterController::unscale(long n, char axis) {
   }  // if-else
 }  // unscale
 
+void XYPlotterController::calcHome(long &xOrigin, long &yOrigin, long &xWidth, long &yWidth) {
+  xOrigin += 72;
+  yOrigin -= 21;
+  xWidth += 22;
+  yWidth -= 73;
+} // calc home
+
 String XYPlotterController::executeCommand(Command c) {
   if (c.numParameters == -1) {
     return SerialUtil::MESSAGE_ERROR;
@@ -232,6 +241,16 @@ String XYPlotterController::executeCommand(Command c) {
     return (this->drawLine(c.parameters[0], c.parameters[1], c.parameters[2], c.parameters[3]))
                ? SerialUtil::MESSAGE_OK
                : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
+  if (strcmp(c.instruction, COMMAND_DRAW_SEG) == 0) {
+    return (this->drawSegment(unscale(c.parameters[0], 'x'), unscale(c.parameters[1], 'y')))
+               ? SerialUtil::MESSAGE_OK
+               : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
+  if (strcmp(c.instruction, COMMAND_HOME) == 0) {
+    return (this->home()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
   }  // if
 
   return SerialUtil::MESSAGE_ERROR;
@@ -296,14 +315,14 @@ bool setAndRun(XYPlotterController *self, long x, long y) {
 bool XYPlotterController::testX() {
   bool res = setAndRun(this, 500, 500);
   delay(500);
-  if (res) res = setAndRun(this, 0, 0);
+  if (res) res = setAndRun(this, 10, 10);
   return res;
 }  // testX
 
 bool XYPlotterController::testY() {
   bool res = setAndRun(this, 450, 600);
   delay(500);
-  if (res) res = setAndRun(this, 0, 0);
+  if (res) res = setAndRun(this, 10, 10);
   return res;
 }  // testY
 
@@ -377,6 +396,7 @@ void XYPlotterController::moveStepper(const int pin) {
 }  // move stepper
 
 bool XYPlotterController::home() {
+  penUp();
   this->setTargetCoordinates(this->xOrigin, this->yOrigin);
   Serial.print("Rehoming...");
   this->runToCompletion();
@@ -397,8 +417,11 @@ bool XYPlotterController::drawLine(long x1, long y1, long x2, long y2) {
     this->runToCompletion();
   }  // if
   this->penDown();
-
-  this->setTargetCoordinates(xEnd, yEnd);
-  return this->runToCompletion();
+  return this->drawSegment(xEnd, yEnd);
 }  // drawLone
+
+bool XYPlotterController::drawSegment(long x, long y) {
+  this->setTargetCoordinates(x, y);
+  return this->runToCompletion();
+} // draw Segment
 }  // namespace calebrjc::XYPlotter

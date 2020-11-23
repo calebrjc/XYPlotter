@@ -111,6 +111,11 @@ class XYPlotterController final {
   // Doc
   long unscale(long n, char axis);
 
+  //This helper will set the true values of home due to calibration
+  //uses references to varables to change all at once and 
+  // eliminate the need for return
+  void calcHome(long &xOrigin, long &yOrigin, long &xWidth, long &yWidth);
+
   // Doc
   void setTargetCoordinates(long x, long y);
 
@@ -150,6 +155,9 @@ class XYPlotterController final {
 
   // Doc
   bool drawLine(long x1, long y1, long x2, long y2);
+
+  //Helper method that draws a line from current postion to coordinates
+  bool drawSegment(long x, long y);
 };  // XYPlotterController
 }  // namespace calebrjc::XYPlotter
 

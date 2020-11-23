@@ -44,3 +44,7 @@ class Plotter:
     def draw_line(self, x1, y1, x2, y2):
         command = "DRLN" + nths(x1) + nths(y1) + nths(x2) + nths(y2)
         return self.comm.send_command(command)
+
+    def draw_segment(self, x, y):
+        command = "DRSG" + nths(x) + nths(y)
+        return self.comm.send_command(command)

@@ -47,6 +47,7 @@ int getNumParameters(char *instruction) {
   if (strcmp(instruction, COMMAND_HOME) == 0) numParameters = 0;
   if (strcmp(instruction, COMMAND_MOVE) == 0) numParameters = 2;
   if (strcmp(instruction, COMMAND_DRAW_LINE) == 0) numParameters = 4;
+  if (strcmp(instruction, COMMAND_DRAW_SEG) == 0) numParameters = 2;
 
   return numParameters;
 } // getNumParameters
