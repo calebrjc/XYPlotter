@@ -20,16 +20,15 @@ namespace calebrjc::XYPlotter {
 const int PLOTTER_WIDTH = 10000;
 const int BACKGROUND_THRESHOLD = 3;
 const int FOREGROUND_THRESHOLD = 5;
-const int LIGHT_THRESHOLD = 500;
 const int SERVO_UP_POS = 78;    // DEFINE THIS
 const int SERVO_DOWN_POS = 100;  // DEFINE THIS
 const int BUMPER_PRESS = 900;
 
 // Analog pins
-#define PIN_LIGHT_SENSOR A5
+#define PIN_LIGHT_SENSOR A6
 //#define PIN_SERVO 3  // DEFINED
-#define PIN_X_BUMPERS A2
-#define PIN_Y_BUMPERS A3
+#define PIN_X_BUMPERS A1
+#define PIN_Y_BUMPERS A2
 
 // Digital pins
 const int PIN_SERVO = 3;
@@ -53,6 +52,9 @@ class XYPlotterController final {
   // containing SerialUtil::MESSAGE_OKAY or an error description as appropriate, typically based on
   // the result of one of the private execution methods.
   String executeCommand(Command c);
+
+  //Value of light reflected to sensor
+  int LightThreshold;
 
   // Doc
   long xOrigin;
@@ -89,6 +91,15 @@ class XYPlotterController final {
 
   // Doc
   Servo servo;
+
+  //sets the threshold for the light sensor
+  void setThreshold(char ground);
+
+  //reads the light sensor based on the threshold
+  int readLightSensor();
+
+  //returns the number based on this bumper being pressed
+  int readBumpers(char axis);
 
   // moves the steppers to the origin to set the zeros
   void zeroPlotter();
