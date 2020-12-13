@@ -2,27 +2,29 @@ import time
 
 import serial
 
+com_port = "COM6"
 
 class SerialCommunicator:
     def __init__(self):
-        self.ser = None
+        self._ser = None
         self.serial_init()
 
     def serial_init(self):
-        # Initializing the plotter
+        "Initializes the plotter."
+
         print("Initializing plotter", end="")
 
         # Initialize serial connection
-        self.ser = serial.Serial("COM8", 9600, timeout=.1)
+        self._ser = serial.Serial(com_port, 9600, timeout=.1)
 
         print(".", end="")
 
         # Clearing I/O buffers
-        self.ser.reset_input_buffer()
+        self._ser.reset_input_buffer()
 
         print(".", end="")
 
-        self.ser.reset_output_buffer()
+        self._ser.reset_output_buffer()
 
         print(".", end="")
 
@@ -57,7 +59,7 @@ class SerialCommunicator:
             message += "0"
 
         command = "<" + message + ">"
-        self.ser.write(command.encode())
+        self._ser.write(command.encode())
 
     def send_command(self, message):
         self.send_serial_message(message)
@@ -71,10 +73,10 @@ class SerialCommunicator:
         c = ""
 
         while reading:
-            if self.ser.in_waiting <= 0:
+            if self._ser.in_waiting <= 0:
                 continue
 
-            c = self.ser.read().decode()
+            c = self._ser.read().decode()
 
             if recording:
                 if c == ">":

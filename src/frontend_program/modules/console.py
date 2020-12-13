@@ -18,6 +18,8 @@ def interpret_command(command):
             print("TSTY()")
         if command.find("-z") != -1:
             print("TSTZ()")
+    if command.find("draw") == 0:
+        p.draw_line(0, 0, 1000, 1000)
     pass
 
 

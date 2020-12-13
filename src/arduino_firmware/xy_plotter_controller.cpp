@@ -207,6 +207,10 @@ String XYPlotterController::executeCommand(Command c) {
     return (this->testY()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
   }  // if
 
+  if (strcmp(c.instruction, COMMAND_DRAW_LINE) == 0) {
+    return (this->drawLine()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
   return SerialUtil::MESSAGE_ERROR;
 }  // XYPlotterController::executeCommand()
 
@@ -295,21 +299,15 @@ bool XYPlotterController::testY() {
 //   return true;
 // }  // testZ
 
-// bool penUp() {
-//   this->servo.write(SERVO_UP_POS);
-//   return true;
-// }
+bool penUp() {
+  //
+  return true;
+}
 
-// bool penDown() {
-//   this->servo.write(SERVO_DOWN_POS);
-//   return true;
-// }
-
-// bool move(long x1, long y1, long x2, long y2) {
-//   //
-//   //
-//   return true;
-// }  // move
+bool penDown() {
+  //
+  return true;
+}
 
 bool XYPlotterController::home() {
   this->setTargetCoordinates(this->xOrigin, this->yOrigin);
@@ -319,9 +317,19 @@ bool XYPlotterController::home() {
   return true;
 }  // home
 
-// bool drawLine(long x1, long y1, long x2, long y2) {
-//   //
-//   //
-//   return true;
-// }  // drawLone
+bool drawLine(long x1, long y1, long x2, long y2) {
+  long xStart = this->unscale(x1);
+  long yStart = this->unscale(y1);
+  long xEnd = this->unscale(x2);
+  long yEnd = this->unscale(y2);
+
+  this->penUp();
+  if (this->xCurrent != xStart || this->yCurrent != yStart) {
+    this->setTargetCoordinates(xStart, yStart);
+    this->runToCompletion();
+  }  // if
+  this->penDown();
+  this->setTargetCoordinates(xEnd, yEnd);
+  return this->runToCompletion();
+}  // drawLone
 }  // namespace calebrjc::XYPlotter
