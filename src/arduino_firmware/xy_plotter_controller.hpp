@@ -20,16 +20,19 @@ namespace calebrjc::XYPlotter {
 const int PLOTTER_WIDTH = 10000;
 const int BACKGROUND_THRESHOLD = 3;
 const int FOREGROUND_THRESHOLD = 5;
-const int SERVO_UP_POS = 0;    // DEFINE THIS
-const int SERVO_DOWN_POS = 0;  // DEFINE THIS
+const int LIGHT_THRESHOLD = 500;
+const int SERVO_UP_POS = 78;    // DEFINE THIS
+const int SERVO_DOWN_POS = 100;  // DEFINE THIS
+const int BUMPER_PRESS = 900;
 
 // Analog pins
-#define PIN_LIGHT_SENSOR A0
-#define PIN_SERVO 0  // DEFINE THIS
+#define PIN_LIGHT_SENSOR A6
+//#define PIN_SERVO 3  // DEFINED
 #define PIN_X_BUMPERS A1
 #define PIN_Y_BUMPERS A2
 
 // Digital pins
+const int PIN_SERVO = 3;
 const int PIN_ENABLE = 6;
 const int PIN_X2_DIRECTION = 7;
 const int PIN_X2_STEP = 8;
@@ -87,6 +90,15 @@ class XYPlotterController final {
   // Doc
   Servo servo;
 
+  // moves the steppers to the origin to set the zeros
+  void zeroPlotter();
+
+  //moves steppers off bumpers
+  void offZero();
+
+  //Must set direction pin before calling this function
+  void moveStepper(const int StepperPin);
+  
   // Doc
   void findPaper();
 

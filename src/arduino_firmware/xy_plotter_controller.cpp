@@ -10,7 +10,11 @@ long xLast;
 long yLast;
 
 int readLightSensor() {
-  int value = analogRead(PIN_LIGHT_SENSOR) / 100;
+  int value = analogRead(PIN_LIGHT_SENSOR);
+  if (value > 500)
+    digitalWrite(4, HIGH);
+  else
+    digitalWrite(4, LOW);
   return value;
 }
 
@@ -43,10 +47,21 @@ void XYPlotterController::initializePlotter() {
   pinMode(PIN_EMERGENCY_STOP, INPUT);
   pinMode(PIN_LIGHT_SENSOR, INPUT);
 
+  pinMode(4, OUTPUT);
+
   digitalWrite(PIN_ENABLE, HIGH);
 
+  ///////////SERVO INITIALIZATION//////////
+  this->servo = Servo();
+  this->servo.attach(PIN_SERVO);
+  penDown();
+
+  ////////// ZEROING THE PLOTTER //////////
+  penUp();
+  zeroPlotter();
+
   ////////// STEPPER INITIALIZAITON //////////
-  long stepperSpeed = 250;
+  long stepperSpeed = 250;  // was 250
 
   this->xStepper1 = AccelStepper(AccelStepper::DRIVER, PIN_X1_STEP, PIN_X1_DIRECTION);
   this->xStepper1.setMaxSpeed(stepperSpeed);
@@ -65,50 +80,47 @@ void XYPlotterController::initializePlotter() {
   steppers.addStepper(xStepper2);
   steppers.addStepper(yStepper);
 
-  this->servo = Servo();
-  this->servo.attach(PIN_SERVO);
+  // Run motors until bumpers are no longer hit
+  offZero();
 
-  ////////// ZEROING THE PLOTTER //////////
-
-  // Run motors until bumpers are hit
-
+  /*
   this->xStepper1.setCurrentPosition(0);
   this->xStepper2.setCurrentPosition(0);
   this->yStepper.setCurrentPosition(0);
   this->xCurrent = 0;
   this->yCurrent = 0;
+  */
 
   ////////// FINDING AND MEASURING THE PAPER //////////
 
-  // this->findPaper();
-  // delay(1000);
+  this->findPaper();
 
-  // this->yWidth = this->findWidth('y');
-  // delay(1000);
-  // this->yOrigin = this->findOrigin('y');
-  // delay(1000);
+  this->yWidth = this->findWidth('y');
+  this->setTargetCoordinates(this->xCurrent, this->yWidth - 50);
+  this->runToCompletion();
+  this->yOrigin = this->findOrigin('y');
 
-  // // Moving to midpoint of y axis
-  // Serial.println("Moving to y midpoint...");
-  // this->setTargetCoordinates(this->xCurrent, (this->yOrigin + this->yWidth) / 2);
-  // this->runToCompletion();
-  // Serial.println("DONE");
+  // Moving to midpoint of y axis
+  Serial.println("Moving to y midpoint...");
+  this->setTargetCoordinates(this->xCurrent, (this->yOrigin + this->yWidth) / 2);
+  this->runToCompletion();
+  Serial.println("DONE");
 
-  // this->xWidth = this->findWidth('x');
-  // delay(1000);
-  // this->xOrigin = this->findOrigin('x');
-  // delay(1000);
+  this->xWidth = this->findWidth('x');
+  this->setTargetCoordinates(this->xWidth - 50, this->yCurrent);
+  this->runToCompletion();
+  this->xOrigin = this->findOrigin('x');
 
-  // this->home();
+  this->home();
 
-  // Serial.print("Y Width: ");
-  // Serial.println(this->yWidth);
-  // Serial.print("Y Origin: ");
-  // Serial.println(this->yOrigin);
-  // Serial.print("X Width: ");
-  // Serial.println(this->xWidth);
-  // Serial.print("X Origin: ");
-  // Serial.println(this->xOrigin);
+  Serial.print("Y Width: ");
+  Serial.println(this->yWidth);
+  Serial.print("Y Origin: ");
+  Serial.println(this->yOrigin);
+  Serial.print("X Width: ");
+  Serial.println(this->xWidth);
+  Serial.print("X Origin: ");
+  Serial.println(this->xOrigin);
 
   SerialUtil::sendMessage(SerialUtil::MESSAGE_READY);
 }  // XYPlotterController::initializePlotter()
@@ -117,12 +129,12 @@ void XYPlotterController::findPaper() {
   // Detect the paper on the diagonal axis
   this->setTargetCoordinates(PLOTTER_WIDTH, PLOTTER_WIDTH);
   Serial.println("Detecting paper... (dark to light transition)");
-  while (readLightSensor() < FOREGROUND_THRESHOLD) step();
+  while (readLightSensor() > LIGHT_THRESHOLD) step();
   Serial.println("DONE");
 
   // Step into the paper a little
   Serial.println("Stepping into paper...");
-  this->setTargetCoordinates(this->xCurrent + 5, this->yCurrent + 5);
+  this->setTargetCoordinates(this->xCurrent + 70, this->yCurrent + 70);
   this->runToCompletion();
   Serial.println("DONE");
 }  // findPaper
@@ -132,14 +144,14 @@ long XYPlotterController::findWidth(char axis) {
     // Finding x width
     this->setTargetCoordinates(PLOTTER_WIDTH, this->yCurrent);
     Serial.println("Detecting right edge... (light to dark transition)");
-    while (readLightSensor() > BACKGROUND_THRESHOLD) step();
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // FOREGROUND
     Serial.println("DONE");
     return this->xCurrent;
   } else {
     // Finding y width
     this->setTargetCoordinates(this->xCurrent, PLOTTER_WIDTH);
     Serial.println("Detecting bottom edge... (light to dark transition)");
-    while (readLightSensor() > BACKGROUND_THRESHOLD) step();
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // BACKGROUND
     Serial.println("DONE");
     return this->yCurrent;
   }  //  if-else
@@ -151,25 +163,26 @@ long XYPlotterController::findOrigin(char axis) {
     this->setTargetCoordinates(0, this->yCurrent);
 
     Serial.println("Detecting right edge... again... (dark to light transition)");
-    while (readLightSensor() < FOREGROUND_THRESHOLD) step();
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // Foreground
     Serial.println("DONE");
-
+    /*
     Serial.println("Detecting left edge... (light to dark transition)");
     Serial.println("DONE");
-    while (readLightSensor() > BACKGROUND_THRESHOLD) step();
+    while (readLightSensor() > LIGHT_THRESHOLD) step();//Backgorund
+    */
     return this->xCurrent;
   } else {
     // Finding y origin
     this->setTargetCoordinates(this->xCurrent, 0);
 
     Serial.println("Detecting bottom edge... again... (dark to light transition)");
-    while (readLightSensor() < FOREGROUND_THRESHOLD) step();
+    while (readLightSensor() < LIGHT_THRESHOLD) step();  // forground
     Serial.println("DONE");
-
+    /*
     Serial.println("Detecting top edge... (light to dark transition)");
-    while (readLightSensor() > BACKGROUND_THRESHOLD) step();
+    while (readLightSensor() > LIGHT_THRESHOLD) step(); //bacround
     Serial.println("DONE");
-
+    */
     return this->yCurrent;
   }  //  if-else
 }  // findYOrigin
@@ -207,8 +220,18 @@ String XYPlotterController::executeCommand(Command c) {
     return (this->testY()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
   }  // if
 
+  if (strcmp(c.instruction, COMMAND_PEN_UP) == 0) {
+    return (this->penUp()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
+  if (strcmp(c.instruction, COMMAND_PEN_DOWN) == 0) {
+    return (this->penDown()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
   if (strcmp(c.instruction, COMMAND_DRAW_LINE) == 0) {
-    return (this->drawLine()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
+    return (this->drawLine(c.parameters[0], c.parameters[1], c.parameters[2], c.parameters[3]))
+      ? SerialUtil::MESSAGE_OK
+      : SerialUtil::MESSAGE_ERROR;
   }  // if
 
   return SerialUtil::MESSAGE_ERROR;
@@ -228,17 +251,8 @@ bool XYPlotterController::isAtTarget() {
 
 bool XYPlotterController::step() {
   digitalWrite(PIN_ENABLE, LOW);
-  if (digitalRead(PIN_EMERGENCY_STOP) == 1) {
-    digitalWrite(PIN_ENABLE, HIGH);
-    return false;
-  }  // if
-
-  if (readBumpers('x') < 900) {
-    digitalWrite(PIN_ENABLE, HIGH);
-    return false;
-  }  // if
-
-  if (readBumpers('y') < 900) {
+  if (digitalRead(PIN_EMERGENCY_STOP) == 1 || readBumpers('x') < BUMPER_PRESS ||
+      readBumpers('y') < BUMPER_PRESS) {
     digitalWrite(PIN_ENABLE, HIGH);
     return false;
   }  // if
@@ -280,7 +294,7 @@ bool setAndRun(XYPlotterController *self, long x, long y) {
 }
 
 bool XYPlotterController::testX() {
-  bool res = setAndRun(this, 500, 300);
+  bool res = setAndRun(this, 500, 500);
   delay(500);
   if (res) res = setAndRun(this, 0, 0);
   return res;
@@ -293,21 +307,62 @@ bool XYPlotterController::testY() {
   return res;
 }  // testY
 
-// bool XYPlotterController::testZ() {
-//   //
-//   //
-//   return true;
-// }  // testZ
-
-bool penUp() {
-  //
+bool XYPlotterController::penUp() {
+  this->servo.write(SERVO_UP_POS);
   return true;
 }
 
-bool penDown() {
-  //
+bool XYPlotterController::penDown() {
+  this->servo.write(SERVO_DOWN_POS);
   return true;
 }
+
+void XYPlotterController::zeroPlotter() {
+  digitalWrite(PIN_ENABLE, LOW);
+  digitalWrite(PIN_Y_DIRECTION, LOW);
+  digitalWrite(PIN_X1_DIRECTION, LOW);
+  digitalWrite(PIN_X2_DIRECTION, LOW);
+
+  while (readBumpers('x') > BUMPER_PRESS || readBumpers('y') > BUMPER_PRESS) {
+    if (readBumpers('x') > BUMPER_PRESS) {
+      moveStepper(PIN_X1_STEP);
+      moveStepper(PIN_X2_STEP);
+    }  // if
+    if (readBumpers('y') > BUMPER_PRESS) {
+      moveStepper(PIN_Y_STEP);
+    }  // if
+  }    // while
+  digitalWrite(PIN_ENABLE, HIGH);
+}  // zeroPlotter
+
+void XYPlotterController::offZero() {
+  digitalWrite(PIN_ENABLE, LOW);
+  digitalWrite(PIN_Y_DIRECTION, HIGH);
+  digitalWrite(PIN_X1_DIRECTION, HIGH);
+  digitalWrite(PIN_X2_DIRECTION, HIGH);
+
+  int stepsOff = 5;
+
+  for (int i = 0; i < stepsOff; i++) {
+    moveStepper(PIN_X1_STEP);
+    moveStepper(PIN_X2_STEP);
+    moveStepper(PIN_Y_STEP);
+  }  // for i
+  this->xStepper1.setCurrentPosition(stepsOff);
+  this->xStepper2.setCurrentPosition(stepsOff);
+  this->yStepper.setCurrentPosition(stepsOff);
+  this->xCurrent = this->xStepper1.currentPosition();
+  this->yCurrent = this->yStepper.currentPosition();
+
+  digitalWrite(PIN_ENABLE, HIGH);
+}  // off zero
+
+void XYPlotterController::moveStepper(const int pin) {
+  digitalWrite(pin, HIGH);
+  delayMicroseconds(2000);
+  digitalWrite(pin, LOW);
+  delayMicroseconds(2000);
+}  // move stepper
 
 bool XYPlotterController::home() {
   this->setTargetCoordinates(this->xOrigin, this->yOrigin);
@@ -317,11 +372,12 @@ bool XYPlotterController::home() {
   return true;
 }  // home
 
-bool drawLine(long x1, long y1, long x2, long y2) {
-  long xStart = this->unscale(x1);
-  long yStart = this->unscale(y1);
-  long xEnd = this->unscale(x2);
-  long yEnd = this->unscale(y2);
+bool XYPlotterController::drawLine(long x1, long y1, long x2, long y2) {
+  long xStart, yStart, xEnd, yEnd;
+  xStart = this->unscale(x1, 'x');
+  yStart = this->unscale(y1, 'y');
+  xEnd = this->unscale(x2, 'x');
+  yEnd = this->unscale(y2, 'y');
 
   this->penUp();
   if (this->xCurrent != xStart || this->yCurrent != yStart) {
