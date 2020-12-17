@@ -20,7 +20,6 @@ namespace calebrjc::XYPlotter {
 const int PLOTTER_WIDTH = 10000;
 const int BACKGROUND_THRESHOLD = 3;
 const int FOREGROUND_THRESHOLD = 5;
-const int LIGHT_THRESHOLD = 500;
 const int SERVO_UP_POS = 78;    // DEFINE THIS
 const int SERVO_DOWN_POS = 100;  // DEFINE THIS
 const int BUMPER_PRESS = 900;
@@ -53,6 +52,9 @@ class XYPlotterController final {
   // containing SerialUtil::MESSAGE_OKAY or an error description as appropriate, typically based on
   // the result of one of the private execution methods.
   String executeCommand(Command c);
+
+  //Value of light reflected to sensor
+  int LightThreshold;
 
   // Doc
   long xOrigin;
@@ -90,6 +92,15 @@ class XYPlotterController final {
   // Doc
   Servo servo;
 
+  //sets the threshold for the light sensor
+  void setThreshold(char ground);
+
+  //reads the light sensor based on the threshold
+  int readLightSensor();
+
+  //returns the number based on this bumper being pressed
+  int readBumpers(char axis);
+
   // moves the steppers to the origin to set the zeros
   void zeroPlotter();
 
@@ -110,6 +121,11 @@ class XYPlotterController final {
 
   // Doc
   long unscale(long n, char axis);
+
+  //This helper will set the true values of home due to calibration
+  //uses references to varables to change all at once and 
+  // eliminate the need for return
+  void calcHome(long &xOrigin, long &yOrigin, long &xWidth, long &yWidth);
 
   // Doc
   void setTargetCoordinates(long x, long y);
@@ -150,6 +166,9 @@ class XYPlotterController final {
 
   // Doc
   bool drawLine(long x1, long y1, long x2, long y2);
+
+  //Helper method that draws a line from current postion to coordinates
+  bool drawSegment(long x, long y);
 };  // XYPlotterController
 }  // namespace calebrjc::XYPlotter
 

@@ -9,16 +9,24 @@ namespace calebrjc::XYPlotter {
 long xLast;
 long yLast;
 
-int readLightSensor() {
+void XYPlotterController::setThreshold(char ground) {
+  if (ground == 'b') {
+    LightThreshold = analogRead(PIN_LIGHT_SENSOR) - 90;
+  } else {
+    LightThreshold = analogRead(PIN_LIGHT_SENSOR) + 70;
+  }
+}  // setthreshold
+
+int XYPlotterController::readLightSensor() {
   int value = analogRead(PIN_LIGHT_SENSOR);
-  if (value > 500)
+  if (value > LightThreshold)
     digitalWrite(4, HIGH);
   else
     digitalWrite(4, LOW);
   return value;
 }
 
-int readBumpers(char axis) {
+int XYPlotterController::readBumpers(char axis) {
   if (axis == 'x') {
     return analogRead(PIN_X_BUMPERS);
   } else {
@@ -29,6 +37,7 @@ int readBumpers(char axis) {
 void XYPlotterController::initializePlotter() {
   xLast = 0;
   yLast = 0;
+  LightThreshold = 0;
 
   ////////// SERIAL INITIALIZAITON //////////
   Serial.begin(9600);
@@ -111,7 +120,11 @@ void XYPlotterController::initializePlotter() {
   this->runToCompletion();
   this->xOrigin = this->findOrigin('x');
 
+  //////Calibrate home based on sensor location off center////////
+  calcHome(xOrigin, yOrigin, xWidth, yWidth);
+
   this->home();
+  SerialUtil::sendMessage(SerialUtil::MESSAGE_READY);
 
   Serial.print("Y Width: ");
   Serial.println(this->yWidth);
@@ -121,21 +134,20 @@ void XYPlotterController::initializePlotter() {
   Serial.println(this->xWidth);
   Serial.print("X Origin: ");
   Serial.println(this->xOrigin);
-
-  SerialUtil::sendMessage(SerialUtil::MESSAGE_READY);
 }  // XYPlotterController::initializePlotter()
 
 void XYPlotterController::findPaper() {
   // Detect the paper on the diagonal axis
   this->setTargetCoordinates(PLOTTER_WIDTH, PLOTTER_WIDTH);
   Serial.println("Detecting paper... (dark to light transition)");
-  while (readLightSensor() > LIGHT_THRESHOLD) step();
+  while (readLightSensor() > LightThreshold) step();
   Serial.println("DONE");
 
   // Step into the paper a little
   Serial.println("Stepping into paper...");
   this->setTargetCoordinates(this->xCurrent + 70, this->yCurrent + 70);
   this->runToCompletion();
+  this->setThreshold('w');
   Serial.println("DONE");
 }  // findPaper
 
@@ -144,14 +156,14 @@ long XYPlotterController::findWidth(char axis) {
     // Finding x width
     this->setTargetCoordinates(PLOTTER_WIDTH, this->yCurrent);
     Serial.println("Detecting right edge... (light to dark transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step();  // FOREGROUND
+    while (readLightSensor() < LightThreshold) step();  // FOREGROUND
     Serial.println("DONE");
     return this->xCurrent;
   } else {
     // Finding y width
     this->setTargetCoordinates(this->xCurrent, PLOTTER_WIDTH);
     Serial.println("Detecting bottom edge... (light to dark transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step();  // BACKGROUND
+    while (readLightSensor() < LightThreshold) step();  // BACKGROUND
     Serial.println("DONE");
     return this->yCurrent;
   }  //  if-else
@@ -163,12 +175,12 @@ long XYPlotterController::findOrigin(char axis) {
     this->setTargetCoordinates(0, this->yCurrent);
 
     Serial.println("Detecting right edge... again... (dark to light transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step();  // Foreground
+    while (readLightSensor() < LightThreshold) step();  // Foreground
     Serial.println("DONE");
     /*
     Serial.println("Detecting left edge... (light to dark transition)");
     Serial.println("DONE");
-    while (readLightSensor() > LIGHT_THRESHOLD) step();//Backgorund
+    while (readLightSensor() > LightThreshold) step();//Backgorund
     */
     return this->xCurrent;
   } else {
@@ -176,11 +188,11 @@ long XYPlotterController::findOrigin(char axis) {
     this->setTargetCoordinates(this->xCurrent, 0);
 
     Serial.println("Detecting bottom edge... again... (dark to light transition)");
-    while (readLightSensor() < LIGHT_THRESHOLD) step();  // forground
+    while (readLightSensor() < LightThreshold) step();  // forground
     Serial.println("DONE");
     /*
     Serial.println("Detecting top edge... (light to dark transition)");
-    while (readLightSensor() > LIGHT_THRESHOLD) step(); //bacround
+    while (readLightSensor() > LightThreshold) step(); //bacround
     Serial.println("DONE");
     */
     return this->yCurrent;
@@ -198,6 +210,13 @@ long XYPlotterController::unscale(long n, char axis) {
     return ((n * newRange) / oldRange) + yOrigin;
   }  // if-else
 }  // unscale
+
+void XYPlotterController::calcHome(long &xOrigin, long &yOrigin, long &xWidth, long &yWidth) {
+  xOrigin += 72;
+  yOrigin -= 21;
+  xWidth += 5;  // was 22
+  yWidth -= 73;
+}  // calc home
 
 String XYPlotterController::executeCommand(Command c) {
   if (c.numParameters == -1) {
@@ -230,8 +249,18 @@ String XYPlotterController::executeCommand(Command c) {
 
   if (strcmp(c.instruction, COMMAND_DRAW_LINE) == 0) {
     return (this->drawLine(c.parameters[0], c.parameters[1], c.parameters[2], c.parameters[3]))
-      ? SerialUtil::MESSAGE_OK
-      : SerialUtil::MESSAGE_ERROR;
+               ? SerialUtil::MESSAGE_OK
+               : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
+  if (strcmp(c.instruction, COMMAND_DRAW_SEG) == 0) {
+    return (this->drawSegment(unscale(c.parameters[0], 'x'), unscale(c.parameters[1], 'y')))
+               ? SerialUtil::MESSAGE_OK
+               : SerialUtil::MESSAGE_ERROR;
+  }  // if
+
+  if (strcmp(c.instruction, COMMAND_HOME) == 0) {
+    return (this->home()) ? SerialUtil::MESSAGE_OK : SerialUtil::MESSAGE_ERROR;
   }  // if
 
   return SerialUtil::MESSAGE_ERROR;
@@ -296,14 +325,14 @@ bool setAndRun(XYPlotterController *self, long x, long y) {
 bool XYPlotterController::testX() {
   bool res = setAndRun(this, 500, 500);
   delay(500);
-  if (res) res = setAndRun(this, 0, 0);
+  if (res) res = setAndRun(this, 10, 10);
   return res;
 }  // testX
 
 bool XYPlotterController::testY() {
   bool res = setAndRun(this, 450, 600);
   delay(500);
-  if (res) res = setAndRun(this, 0, 0);
+  if (res) res = setAndRun(this, 10, 10);
   return res;
 }  // testY
 
@@ -355,6 +384,8 @@ void XYPlotterController::offZero() {
   this->yCurrent = this->yStepper.currentPosition();
 
   digitalWrite(PIN_ENABLE, HIGH);
+
+  this->setThreshold('b');
 }  // off zero
 
 void XYPlotterController::moveStepper(const int pin) {
@@ -365,6 +396,7 @@ void XYPlotterController::moveStepper(const int pin) {
 }  // move stepper
 
 bool XYPlotterController::home() {
+  penUp();
   this->setTargetCoordinates(this->xOrigin, this->yOrigin);
   Serial.print("Rehoming...");
   this->runToCompletion();
@@ -385,7 +417,12 @@ bool XYPlotterController::drawLine(long x1, long y1, long x2, long y2) {
     this->runToCompletion();
   }  // if
   this->penDown();
-  this->setTargetCoordinates(xEnd, yEnd);
-  return this->runToCompletion();
+  delay(200);
+  return this->drawSegment(xEnd, yEnd);
 }  // drawLone
+
+bool XYPlotterController::drawSegment(long x, long y) {
+  this->setTargetCoordinates(x, y);
+  return this->runToCompletion();
+}  // draw Segment
 }  // namespace calebrjc::XYPlotter

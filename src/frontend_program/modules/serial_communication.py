@@ -4,6 +4,7 @@ import serial
 
 com_port = "COM6"
 
+
 class SerialCommunicator:
     def __init__(self):
         self._ser = None
